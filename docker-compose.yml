@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: set_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: set_db
+      MYSQL_USER: set_user
+      MYSQL_PASSWORD: set_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./ddl_scripts:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql_data: 
