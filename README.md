@@ -63,3 +63,20 @@ The script will:
 * Save these files to the docker volume
 * Insert data to the DB
 * Remove unnecessary csv files
+
+## Screenshots
+
+### Users table
+![img.png](assets/img.png)
+
+### Advertisers table
+![img_1.png](assets/img_1.png)
+
+### Campaigns table
+![img_2.png](assets/img_2.png)
+
+### Impressions table
+![img.png](assets/img_3.png)
+
+### Clicks table
+![img_1.png](assets/img_4.png)
