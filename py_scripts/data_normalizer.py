@@ -6,7 +6,7 @@ def normalize_ad_events():
     """Normalize ad_events data and save to dataset_normalized folder"""
     # Fix file by separating data from TargetingCriteria column (due to unquoted commas)
     fixed_rows = []
-    with open("../dataset/ad_events.csv", 'r') as f:
+    with open("dataset/ad_events.csv", 'r') as f:
         header = f.readline().strip().split(',')
 
         for line in f:
@@ -50,7 +50,7 @@ def normalize_ad_events():
 
 def normalize_campaigns():
     """Normalize campaigns data and save to dataset_normalized folder."""
-    df_campaigns = pd.read_csv('../dataset/campaigns.csv')
+    df_campaigns = pd.read_csv('dataset/campaigns.csv')
     
     # Fix data types
     df_campaigns['CampaignStartDate'] = pd.to_datetime(df_campaigns['CampaignStartDate'], errors='coerce')
@@ -66,7 +66,7 @@ def normalize_campaigns():
 
 def normalize_users():
     """Normalize users data and save to dataset_normalized folder."""
-    df_users = pd.read_csv('../dataset/users.csv')
+    df_users = pd.read_csv('dataset/users.csv')
     
     # Fix data types
     df_users['SignupDate'] = pd.to_datetime(df_users['SignupDate'], errors='coerce')
@@ -77,7 +77,15 @@ def normalize_users():
 
 def normalize_datasets():
     # Create output directory if it doesn't exist
-    os.makedirs("../dataset_normalized", exist_ok=True)
+    os.makedirs("dataset_normalized", exist_ok=True)
+    
+    # Check if all normalized files already exist
+    required_files = ['users.csv', 'campaigns.csv', 'ad_events.csv']
+    all_files_exist = all(os.path.exists(os.path.join("dataset_normalized", file)) for file in required_files)
+    
+    if all_files_exist:
+        print("\nAll datasets have been normalized and saved to dataset_normalized folder.")
+        return
     
     # Normalize all datasets
     print("Normalizing ad_events data...")

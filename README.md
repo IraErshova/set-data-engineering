@@ -39,8 +39,19 @@ What this file does:
 ## 4. Run python script to insert data into the DB:
 
 ```bash
+# Using default connection parameters (recommended for local setup)
 python run.py
+
+# Or specify custom connection parameters
+python run.py --host localhost --database set_db --user set_user --password set_password
 ```
+
+Default MySQL connection parameters (from docker-compose.yml):
+- Host: localhost
+- Port: 3306
+- Database: set_db
+- Username: set_user
+- Password: set_password
 
 The script will:
 

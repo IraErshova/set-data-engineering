@@ -3,7 +3,8 @@ from mysql.connector import Error
 import argparse
 import sys
 from typing import List, Tuple
-from data_transformer import DataTransformer
+from py_scripts.data_transformer import DataTransformer
+
 
 class DataInserter:
     def __init__(self, host: str = 'localhost', database: str = 'set_db',
@@ -206,9 +207,9 @@ def transform_and_insert_data():
     try:
         # Load and transform data
         transformer.load_and_process_data(
-            ad_events_file="../dataset_normalized/ad_events.csv",
-            campaigns_file="../dataset_normalized/campaigns.csv",
-            users_file="../dataset_normalized/users.csv"
+            ad_events_file="dataset_normalized/ad_events.csv",
+            campaigns_file="dataset_normalized/campaigns.csv",
+            users_file="dataset_normalized/users.csv"
         )
 
         # Extract and transform data
