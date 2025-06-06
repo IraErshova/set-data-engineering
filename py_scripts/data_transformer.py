@@ -11,7 +11,7 @@ class DataTransformer:
         self.users = None
         self.campaign_mapping = None
         self.advertiser_mapping = None
-        self.transformed_dir = "dataset_transformed"
+        self.transformed_dir = './csv_data'
         
         # Create directory if it doesn't exist
         if not os.path.exists(self.transformed_dir):

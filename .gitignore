@@ -8,7 +8,7 @@ __pycache__/
 
 dataset/
 dataset_normalized/
-dataset_transformed/
+csv_data/
 
 # Distribution / packaging
 .Python
