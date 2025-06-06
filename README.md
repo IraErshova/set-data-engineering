@@ -1,12 +1,33 @@
-## 1. Add datasets to the project
+## 1. Set up Python environment
+
+1. Create and activate a virtual environment:
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# .\venv\Scripts\activate
+```
+
+2. Install required packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+## 2. Add datasets to the project
 
 * Create a directory `dataset` and put `ad_events.csv`, `campaigns.csv` and `users.csv` files in it
 
 
-## 2. Run docker compose file:
+## 3. Run docker compose file:
 
 ```bash
-  docker-compose up -d
+docker-compose up -d
 ```
 
 What this file does:
@@ -15,10 +36,10 @@ What this file does:
 * Runs all .sql files in `./ddl_scripts` as initialization scripts in alphabetical order.
 * Persists MySQL data in a volume so it's not lost when the container is stopped or deleted.
 
-## 2. Run python script to insert data into the DB:
+## 4. Run python script to insert data into the DB:
 
 ```bash
-  python run.py
+python run.py
 ```
 
 The script will:
