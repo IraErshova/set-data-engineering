@@ -64,19 +64,46 @@ The script will:
 * Insert data to the DB
 * Remove unnecessary csv files
 
+## 5. Run SQL queries from HW 3 and get a csv report
+```bash
+python py_scripts/performance_report.py
+```
+
 ## Screenshots
 
 ### Users table
-![img.png](assets/img.png)
+![img.png](assets/tables/img.png)
 
 ### Advertisers table
-![img_1.png](assets/img_1.png)
+![img_1.png](assets/tables/img_1.png)
 
 ### Campaigns table
-![img_2.png](assets/img_2.png)
+![img_2.png](assets/tables/img_2.png)
 
 ### Impressions table
-![img.png](assets/img_3.png)
+![img.png](assets/tables/img_3.png)
 
 ### Clicks table
-![img_1.png](assets/img_4.png)
+![img_1.png](assets/tables/img_4.png)
+
+
+### Top 5 Campaigns by Click-Through Rate (CTR)
+![img.png](assets/performance-queries/img.png)
+
+### Advertisers with Highest Spend in the Last 30 Days
+![img_1.png](assets/performance-queries/img_1.png)
+
+### Cost Efficiency: Average CPC and CPM per Campaign
+![img_2.png](assets/performance-queries/img_2.png)
+
+### Top Locations by Total Ad Revenue from Clicks
+![img_3.png](assets/performance-queries/img_3.png)
+
+### Top 10 Most Engaged Users by Clicks
+![img_4.png](assets/performance-queries/img_4.png)
+
+### Campaigns with > 80% Budget Spent
+![img_5.png](assets/performance-queries/img_5.png)
+
+### CTR Comparison Across Devices
+![img_6.png](assets/performance-queries/img_6.png)
