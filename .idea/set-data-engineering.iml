@@ -5,8 +5,6 @@
       <excludeFolder url="file://$MODULE_DIR$/dataset" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/.ipynb_checkpoints" />
-      <excludeFolder url="file://$MODULE_DIR$/csv_data" />
-      <excludeFolder url="file://$MODULE_DIR$/dataset_normalized" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (set-data-engineering)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
