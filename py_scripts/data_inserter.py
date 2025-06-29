@@ -78,6 +78,23 @@ class DataInserter:
             print(f"Error inserting advertisers: {e}")
             raise
 
+    def insert_interests(self, interests_file: str):
+        """Insert interests from CSV file into the database"""
+        print("Inserting interests")
+        try:
+            self._load_data_infile('interests', interests_file)
+        except Exception as e:
+            print(f"Error inserting interests: {e}")
+            raise
+
+    def insert_countries(self, countries_file: str):
+        """Insert countries from CSV file into the database"""
+        print("Inserting countries")
+        try:
+            self._load_data_infile('countries', countries_file)
+        except Exception as e:
+            print(f"Error inserting countries: {e}")
+            raise
 
     def insert_campaigns(self, campaigns_file: str):
         """Insert campaigns from CSV file into the database"""
@@ -88,7 +105,6 @@ class DataInserter:
             print(f"Error inserting campaigns: {e}")
             raise
 
-
     def insert_users(self, users_file: str):
         """Insert users from CSV file into the database"""
         print("Inserting users")
@@ -97,7 +113,6 @@ class DataInserter:
         except Exception as e:
             print(f"Error inserting users: {e}")
             raise
-
 
     def insert_impressions(self, impressions_file: str):
         """Insert ad impressions from CSV files into the database"""
@@ -108,7 +123,6 @@ class DataInserter:
             print(f"Error inserting impressions: {e}")
             raise
 
-
     def insert_clicks(self, clicks_file: str):
         """Insert ad clicks from CSV files into the database"""
         print("Inserting clicks")
@@ -118,6 +132,14 @@ class DataInserter:
             print(f"Error inserting clicks: {e}")
             raise
 
+    def insert_user_interesets(self, user_interests_file: str):
+        """Insert user interests from CSV file into the database"""
+        print("Inserting user interests")
+        try:
+            self._load_data_infile('users_interests', user_interests_file)
+        except Exception as e:
+            print(f"Error inserting user interests: {e}")
+            raise
 
     def rollback_all(self):
         """Rollback all inserted data"""
@@ -140,7 +162,6 @@ class DataInserter:
             print(f"Error during rollback: {e}")
             self.conn.rollback()
             raise
-
 
     def close(self):
         """Close the database connection"""
@@ -171,12 +192,14 @@ def insert_data():
 
     try:
         print("Starting data inserting process...")
-
+        inserter.insert_interests('interests.csv')
+        inserter.insert_countries('countries.csv')
         inserter.insert_users('users.csv')
         inserter.insert_advertisers('advertisers.csv')
         inserter.insert_campaigns('campaigns.csv')
         inserter.insert_impressions('ad_impressions.csv')
         inserter.insert_clicks('ad_clicks.csv')
+        inserter.insert_user_interesets('users_interests.csv')
 
         print("Data inserting completed successfully!")
 

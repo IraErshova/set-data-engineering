@@ -3,30 +3,7 @@ import pandas as pd
 import os
 
 def normalize_ad_events():
-    """Normalize ad_events data and save to dataset_normalized folder"""
-    # Fix file by separating data from TargetingCriteria column (due to unquoted commas)
-    fixed_rows = []
-    with open("dataset/ad_events.csv", 'r') as f:
-        header = f.readline().strip().split(',')
-
-        for line in f:
-            parts = line.strip().split(',')
-
-            # 18 columns + 3 from TargetingCriteria
-            if len(parts) >= 20:
-                # Recombine TargetingCriteria (assumed to be split into 3 parts at positions 5,6,7)
-                fixed = (
-                    parts[:5] +                                     # EventID to CampaignEndDate
-                    [','.join(parts[5:8]).strip()] +                # TargetingCriteria (3 parts)
-                    parts[8:]                                       # Remaining columns
-                )
-
-                # Only accept rows that fix to exactly 18 columns
-                if len(fixed) == 18:
-                    fixed_rows.append(fixed)
-
-    df = pd.DataFrame(fixed_rows, columns=header)
-    
+    df = pd.read_csv('dataset/ad_events.csv', nrows=3_000_000)
     # Remove duplicates
     df = df.drop_duplicates()
     df = df.drop_duplicates(subset='EventID')
@@ -36,7 +13,7 @@ def normalize_ad_events():
     df['CampaignEndDate'] = pd.to_datetime(df['CampaignEndDate'], errors='coerce')
     df['Timestamp'] = pd.to_datetime(df['Timestamp'], errors='coerce')
     df['ClickTimestamp'] = pd.to_datetime(df['ClickTimestamp'], errors='coerce')
-    
+
     # Fix numeric columns
     numeric_cols = ['BidAmount', 'AdCost', 'AdRevenue', 'Budget', 'RemainingBudget']
     df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric, errors='coerce')
@@ -59,6 +36,21 @@ def normalize_campaigns():
     # Fix numeric columns
     numeric_cols = ['Budget', 'RemainingBudget']
     df_campaigns[numeric_cols] = df_campaigns[numeric_cols].apply(pd.to_numeric, errors='coerce')
+
+    # Split into parts using comma
+    parts = df_campaigns['TargetingCriteria'].str.split(',', expand=True)
+
+    # Strip whitespace
+    parts = parts.apply(lambda col: col.str.strip())
+
+    # Extract age range from the first part
+    age_parts = parts[0].str.extract(r'Age\s+(\d+)-(\d+)').astype('Int64')
+
+    # Assign normalized columns
+    df_campaigns['age_from'] = age_parts[0]
+    df_campaigns['age_to'] = age_parts[1]
+    df_campaigns['interest'] = parts[1]
+    df_campaigns['country'] = parts[2]
     
     # Save normalized data
     df_campaigns.to_csv("dataset_normalized/campaigns.csv", index=False)

@@ -37,6 +37,12 @@ What this file does:
 * Persists MySQL data in a volume so it's not lost when the container is stopped or deleted.
 * Create a volume for all csv files we need to insert data to the DB
 
+Stop and remove all containers, networks, and volumes defined in docker-compose.yml:
+
+```bash
+docker-compose down -v
+```
+
 ## 4. Run python script to insert data into the DB:
 
 ```bash
@@ -46,13 +52,6 @@ python run.py
 # Or specify custom connection parameters
 python run.py --host localhost --database set_db --user set_user --password set_password
 ```
-
-Default MySQL connection parameters:
-- Host: localhost
-- Port: 3306
-- Database: set_db
-- Username: set_user
-- Password: set_password
 
 The script will:
 

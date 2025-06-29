@@ -7,4 +7,4 @@ if __name__ == "__main__":
     normalize_datasets()
     transform_datasets()
     insert_data()
-    remove_data()
+    # remove_data()
