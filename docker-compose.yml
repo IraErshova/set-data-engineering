@@ -15,5 +15,19 @@ services:
       - ./csv_data:/csv_files
     command: --default-authentication-plugin=mysql_native_password --secure-file-priv=/csv_files
 
+  mongodb:
+    image: mongo:8.0
+    container_name: set_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rootadmin
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo_init:/docker-entrypoint-initdb.d
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+
 volumes:
-  mysql_data: 
+  mysql_data:
+  mongodb_data:
