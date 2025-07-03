@@ -19,6 +19,8 @@ db.createCollection("ad_sessions", {
               impression_id: { bsonType: "string" },
               campaign_id: { bsonType: "int" },
               campaign_name: { bsonType: "string" },
+              campaign_interest: { bsonType: "string" },
+              campaign_location: { bsonType: "string" },
               advertiser_id: { bsonType: "int" },
               timestamp: { bsonType: "date" },
               location: {

@@ -30,7 +30,7 @@ def parse_date(val):
         try:
             return datetime.fromtimestamp(float(val), timezone.utc)
         except Exception:
-            return datetime.now(timezone.utc)
+            return None
 
 
 class DatabaseManager:
@@ -98,18 +98,22 @@ class DatabaseManager:
                 key = (user_id, device)
                 # Handle click events
                 click_events = []
-                if row.get('ClickTimestamp'):
-                    try:
-                        click_time = parse_date(row['ClickTimestamp'])
-                        click_events.append({'click_timestamp': click_time})
-                    except Exception:
-                        pass
-                campaign_id = self.campaigns.loc[self.campaigns['CampaignName'] == row['CampaignName'], 'CampaignID']
+                click_time = parse_date(row.get('ClickTimestamp'))
+                if click_time is not None:
+                    click_events.append({'click_timestamp': click_time})
+
+                campaign_data = self.campaigns.loc[
+                    self.campaigns['CampaignName'] == row['CampaignName'],
+                    ['CampaignID', 'interest', 'country']
+                ].iloc[0]
+
                 advertiser_id = self.advertisers.loc[
                     self.advertisers['advertiser_name'] == row['AdvertiserName'], 'advertiser_id']
                 impression = {
                     'impression_id': row['EventID'],
-                    'campaign_id': int(campaign_id.values[0]),
+                    'campaign_id': int(campaign_data['CampaignID']),
+                    'campaign_interest': campaign_data['interest'],
+                    'campaign_location': campaign_data['country'],
                     'campaign_name': row.get('CampaignName', ''),
                     'advertiser_id': int(advertiser_id.values[0]),
                     'timestamp': parse_date(row['Timestamp']),
@@ -224,10 +228,10 @@ def insert_data_to_mongo():
     try:
         # Load and transform data
         db_manager.load_datasets(
-            ad_events_file="../dataset_normalized/ad_events.csv",
-            campaigns_file="../dataset_normalized/campaigns.csv",
-            users_file="../dataset_normalized/users.csv",
-            advertisers_file="../csv_data/advertisers.csv",
+            ad_events_file="dataset_normalized/ad_events.csv",
+            campaigns_file="dataset_normalized/campaigns.csv",
+            users_file="dataset_normalized/users.csv",
+            advertisers_file="csv_data/advertisers.csv",
         )
         # Insert all users into MongoDB
         users = db_manager.insert_all_users_to_mongo()

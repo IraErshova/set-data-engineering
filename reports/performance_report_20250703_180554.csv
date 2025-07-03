@@ -1,0 +1,62 @@
+All ad interactions for random user 595785
+impression_id,campaign_id,campaign_interest,campaign_location,campaign_name,advertiser_id,timestamp,location,bid_amount,ad_cost,ad_revenue,clicked,click_events
+a8bb5571-25c4-4121-baf8-100ce3ebe1ca,279,Travel,India,Campaign_279,25,2024-11-08 13:33:33,USA,3.28,2.31,0.0,False,[]
+e73c9af5-537a-47ec-9e4a-b5a828725e12,932,Health,Australia,Campaign_932,93,2024-10-25 07:06:05,USA,4.2,3.42,0.0,False,[]
+8b7c9231-1816-4713-b791-6a3be39ffde1,547,Technology,Australia,Campaign_547,52,2024-10-31 01:39:23,USA,4.96,3.83,0.0,False,[]
+
+
+Last 5 ad sessions for user 77284
+user_id,session_start,session_end,clicks
+77284,2024-11-19 18:40:36,2024-11-19 18:40:36,0
+77284,2024-11-04 08:40:04,2024-11-04 08:40:04,0
+77284,2024-10-02 23:50:37,2024-10-02 23:50:37,0
+
+
+Ad clicks per hour per campaign for advertiser 49 on 2024-10-11
+campaign_id,hour,clicks
+512,8,1
+512,10,1
+512,16,1
+512,23,1
+518,2,1
+518,7,1
+518,13,1
+520,6,1
+520,14,1
+520,15,1
+521,1,1
+521,2,1
+521,3,1
+521,9,1
+521,14,1
+521,17,1
+521,18,1
+522,4,1
+522,5,1
+522,7,1
+522,8,1
+522,10,2
+522,11,1
+522,16,1
+522,23,1
+523,5,1
+523,10,1
+523,16,1
+523,19,1
+523,21,1
+523,22,1
+524,0,1
+524,1,1
+524,3,2
+524,10,1
+524,13,1
+524,21,1
+
+
+Top 3 most engaged ad categories for user 541198
+category,clicks
+Travel,6
+Health,3
+Fashion,3
+
+

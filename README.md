@@ -68,41 +68,34 @@ The script will:
 python py_scripts/performance_report.py
 ```
 
-## Screenshots
+# Homework 3
 
-### Users table
-![img.png](assets/tables/img.png)
+## 1. To create schemas and run mongoDB container:
 
-### Advertisers table
-![img_1.png](assets/tables/img_1.png)
+```bash
+docker-compose up -d
+```
 
-### Campaigns table
-![img_2.png](assets/tables/img_2.png)
+What this file does:
+* Starts a MySQL and MongoDB containers.
+* Creates a MongoDB database called **set_db**.
+* Runs all .js files in `./mongo_init` as initialization scripts in alphabetical order.
+* Persists MongoDB data in a volume so it's not lost when the container is stopped or deleted.
 
-### Impressions table
-![img.png](assets/tables/img_3.png)
+## 2. Insert Data:
 
-### Clicks table
-![img_1.png](assets/tables/img_4.png)
+I used csv files to insert data into MongoDB. To do this you can
+run this script:
+
+```bash
+python py_scripts/insert_data_to_mongo.py
+```
 
 
-### Top 5 Campaigns by Click-Through Rate (CTR)
-![img.png](assets/performance-queries/img.png)
+## 3. Run performance queries and create a report:
 
-### Advertisers with Highest Spend in the Last 30 Days
-![img_1.png](assets/performance-queries/img_1.png)
+```bash
+python py_scripts/performance_report_mongo.py
+```
 
-### Cost Efficiency: Average CPC and CPM per Campaign
-![img_2.png](assets/performance-queries/img_2.png)
 
-### Top Locations by Total Ad Revenue from Clicks
-![img_3.png](assets/performance-queries/img_3.png)
-
-### Top 10 Most Engaged Users by Clicks
-![img_4.png](assets/performance-queries/img_4.png)
-
-### Campaigns with > 80% Budget Spent
-![img_5.png](assets/performance-queries/img_5.png)
-
-### CTR Comparison Across Devices
-![img_6.png](assets/performance-queries/img_6.png)
