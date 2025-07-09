@@ -28,6 +28,19 @@ services:
       - "27017:27017"
     restart: unless-stopped
 
+  cassandra:
+    image: cassandra:4.1
+    container_name: set_cassandra
+    environment:
+      CASSANDRA_CLUSTER_NAME: "set_cluster"
+      CASSANDRA_DATACENTER: "set_datacenter"
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    restart: unless-stopped
+
 volumes:
   mysql_data:
   mongodb_data:
+  cassandra_data:
