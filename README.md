@@ -128,4 +128,12 @@ Run this script to insert data from csv files to cassandra tables:
 python py_scripts/cassandra/insert_data.py
 ```
 
+## 4. Run CQL queries:
+
+Run this script to run queries to answer key business questions:
+
+```bash
+python py_scripts/cassandra/performance_report.py
+```
+
 

@@ -43,3 +43,14 @@ CREATE TABLE advertiser_spend_by_region (
     total_spend DECIMAL,
     PRIMARY KEY ((region), total_spend, advertiser_id)
 ) WITH CLUSTERING ORDER BY (total_spend DESC);
+
+-- Advertiser's spend by region
+CREATE TABLE advertiser_spend_by_region_day (
+    region TEXT,
+    day DATE,
+    advertiser_id INT,
+    advertiser_name TEXT,
+    total_spend DECIMAL,
+    PRIMARY KEY ((region, day), total_spend, advertiser_id)
+) WITH CLUSTERING ORDER BY (total_spend DESC);
+
