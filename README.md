@@ -65,7 +65,7 @@ The script will:
 
 ## 5. Run SQL queries from HW 3 and get a csv report
 ```bash
-python py_scripts/performance_report.py
+python py_scripts/mysql/performance_report.py
 ```
 
 # Homework 3
@@ -88,14 +88,44 @@ I used csv files to insert data into MongoDB. To do this you can
 run this script:
 
 ```bash
-python py_scripts/insert_data_to_mongo.py
+python py_scripts/mongo_db/insert_data_to_mongo.py
 ```
-
 
 ## 3. Run performance queries and create a report:
 
 ```bash
-python py_scripts/performance_report_mongo.py
+python py_scripts/mongo_db/performance_report_mongo.py
+```
+
+# Homework 4
+
+## 1. To run Cassandra in the container:
+
+```bash
+docker-compose up -d
+```
+
+What this file does:
+* Starts a MySQL,  MongoDB and Dassandra containers.
+* Creates a MongoDB database called **set_db**.
+* Runs all .js files in `./mongo_init` as initialization scripts in alphabetical order.
+* Persists MongoDB data in a volume so it's not lost when the container is stopped or deleted.
+
+## 2. Create cassandra schemas:
+
+I've added cql queries to `cql_scripts/create_schemas.cql` to create schemas.
+You can run this python script to create these schemas:
+
+```bash
+python py_scripts/cassandra/create_schemas.py
+```
+
+## 3. Insert data to cassandra:
+
+Run this script to insert data from csv files to cassandra tables:
+
+```bash
+python py_scripts/cassandra/insert_data.py
 ```
 
 

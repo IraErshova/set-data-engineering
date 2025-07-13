@@ -1,7 +1,6 @@
 from cassandra.cluster import Cluster
-from cassandra import ConsistencyLevel
 
-class CassandraSchemaManager:
+class CassandraCreateSchemas:
     def __init__(self, host: str = 'localhost', port: int = 9042, keyspace: str = 'my_keyspace'):
         self.host = host
         self.port = port
@@ -60,9 +59,9 @@ class CassandraSchemaManager:
 if __name__ == "__main__":
     manager = None
     try:
-        manager = CassandraSchemaManager()
+        manager = CassandraCreateSchemas()
         manager.create_keyspace()
-        manager.execute_cql_file("../../cql_scripts/create_schemas.cql")
+        manager.execute_cql_file("cql_scripts/create_schemas.cql")
     except Exception as e:
         print(f"Exception: {e}")
     finally:
