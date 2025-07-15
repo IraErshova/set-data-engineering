@@ -1,8 +1,15 @@
+import json
 import os
+import time
+import redis
 from typing import Annotated
 from fastapi import FastAPI, Query
-import redis
 from mysql.connector import pooling
+
+# TTL settings in seconds
+TTL_CAMPAIGN_PERFORMANCE = 30
+TTL_ADVERTISER_SPENDING = 300  # 5 minutes
+TTL_USER_ENGAGEMENTS = 120
 
 app = FastAPI(title="My API")
 
@@ -35,44 +42,57 @@ def get_redis_client():
     return redis_client
 
 
-@app.get("/")
-def read_root():
-    return {
-        "message": "Advertising Data API",
-        "endpoints": {
-            "campaign_performance": "/campaign/{campaign_id}/performance",
-            "advertiser_spending": "/advertiser/{advertiser_id}/spending",
-            "user_engagements": "/user/{user_id}/engagements",
-            "performance_stats": "/performance/stats",
-            "performance_comparison": "/performance/comparison",
-            "cache_status": "/cache/status"
-        },
-        "documentation": "/docs"
-    }
+def get_from_cache(key: str):
+    # Get data from Redis cache
+    try:
+        cached_data = redis_client.get(key)
+        if cached_data:
+            return json.loads(cached_data)
+        return None
+    except Exception as e:
+        print(f"Cache read error: {e}")
+        return None
 
 
-# API Endpoints
-@app.get("/campaign/{campaign_id}/performance")
-def get_campaign_performance(campaign_id: int, no_cache: Annotated[
-    bool, Query(description="Skip cache for performance testing")] = False):
+def set_in_cache(key: str, data, ttl: int):
+    # Set data in Redis cache with TTL
+    try:
+        redis_client.setex(key, ttl, json.dumps(data, default=str))
+        return True
+    except Exception as e:
+        print(f"Cache write error: {e}")
+        return False
+
+def measure_time(func):
+    # Decorator to measure execution time
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        return result, execution_time
+    return wrapper
+
+@measure_time
+def get_campaign_performance_from_db(campaign_id: int):
     conn = get_mysql_connection()
     cursor = conn.cursor()
     try:
         query = """
-            SELECT
-                ai.campaign_id,
-                COUNT(DISTINCT ai.impression_id) AS impressions,
-                COUNT(DISTINCT ac.click_id) AS clicks,
-                IFNULL(COUNT(DISTINCT ac.click_id) / NULLIF(COUNT(DISTINCT ai.impression_id), 0), 0) * 100 AS ctr,
-                SUM(ai.ad_cost) AS ad_spend
-            FROM
-                ad_impressions ai
-            LEFT JOIN
-                ad_clicks ac ON ai.impression_id = ac.impression_id
-            WHERE ai.campaign_id = %s
-            GROUP BY
-                ai.campaign_id;
-            """
+                SELECT
+                    ai.campaign_id,
+                    COUNT(DISTINCT ai.impression_id) AS impressions,
+                    COUNT(DISTINCT ac.click_id) AS clicks,
+                    IFNULL(COUNT(DISTINCT ac.click_id) / NULLIF(COUNT(DISTINCT ai.impression_id), 0), 0) * 100 AS ctr,
+                    SUM(ai.ad_cost) AS ad_spend
+                FROM
+                    ad_impressions ai
+                LEFT JOIN
+                    ad_clicks ac ON ai.impression_id = ac.impression_id
+                WHERE ai.campaign_id = %s
+                GROUP BY
+                    ai.campaign_id;
+                """
         cursor.execute(query, (campaign_id,))
         result = cursor.fetchone()
         if result is None:
@@ -85,24 +105,22 @@ def get_campaign_performance(campaign_id: int, no_cache: Annotated[
         cursor.close()
         conn.close()
 
-
-@app.get("/advertiser/{advertiser_id}/spending")
-def get_advertisers_spend(advertiser_id: int,
-                          no_cache: Annotated[bool, Query(description="Skip cache for performance testing")] = False):
+@measure_time
+def get_advertisers_spend_from_db(advertiser_id: int):
     conn = get_mysql_connection()
     cursor = conn.cursor()
     try:
         query = """
-            SELECT
-                c.advertiser_id,
-                SUM(ai.ad_cost) AS ad_spend
-            FROM
-                ad_impressions ai
-                JOIN campaigns c ON c.campaign_id = ai.campaign_id
-            WHERE c.advertiser_id = %s
-            GROUP BY
-                c.advertiser_id;
-            """
+                SELECT
+                    c.advertiser_id,
+                    SUM(ai.ad_cost) AS ad_spend
+                FROM
+                    ad_impressions ai
+                    JOIN campaigns c ON c.campaign_id = ai.campaign_id
+                WHERE c.advertiser_id = %s
+                GROUP BY
+                    c.advertiser_id;
+                """
         cursor.execute(query, (advertiser_id,))
         result = cursor.fetchone()
         if result is None:
@@ -115,30 +133,28 @@ def get_advertisers_spend(advertiser_id: int,
         cursor.close()
         conn.close()
 
-
-@app.get("/user/{user_id}/engagements")
-def get_user_engagements(user_id: int,
-                         no_cache: Annotated[bool, Query(description="Skip cache for performance testing")] = False):
+@measure_time
+def get_user_engagements_from_db(user_id: int):
     conn = get_mysql_connection()
     cursor = conn.cursor()
     try:
         query = """
-            SELECT
-                c.advertiser_id,
-                ai.campaign_id,
-                ai.impression_id,
-                ac.click_id,
-                ai.impression_timestamp AS impression_time,
-                ac.click_timestamp AS click_time
-            FROM
-                ad_impressions ai
-                JOIN ad_clicks ac ON ai.impression_id = ac.impression_id
-                JOIN campaigns c ON c.campaign_id = ai.campaign_id
-            WHERE
-                ai.user_id = %s
-            ORDER BY
-                ac.click_timestamp DESC;
-            """
+                SELECT
+                    c.advertiser_id,
+                    ai.campaign_id,
+                    ai.impression_id,
+                    ac.click_id,
+                    ai.impression_timestamp AS impression_time,
+                    ac.click_timestamp AS click_time
+                FROM
+                    ad_impressions ai
+                    JOIN ad_clicks ac ON ai.impression_id = ac.impression_id
+                    JOIN campaigns c ON c.campaign_id = ai.campaign_id
+                WHERE
+                    ai.user_id = %s
+                ORDER BY
+                    ac.click_timestamp DESC;
+                """
         cursor.execute(query, (user_id,))
         result = cursor.fetchall()
         if result is None:
@@ -152,6 +168,117 @@ def get_user_engagements(user_id: int,
     finally:
         cursor.close()
         conn.close()
+
+
+@app.get("/")
+def read_root():
+    return {
+        "message": "Advertising Data API",
+    }
+
+
+# API Endpoints
+@app.get("/campaign/{campaign_id}/performance")
+def get_campaign_performance(campaign_id: int, no_cache: Annotated[
+    bool, Query(description="Skip cache for performance testing")] = False):
+    cache_key = f"campaign_performance:{campaign_id}"
+    start_time = time.time()
+
+    # Check cache first (unless no_cache is True)
+    if not no_cache:
+        cached_data = get_from_cache(cache_key)
+        if cached_data:
+            end_time = time.time()
+            performance_stats['with_cache'].append(end_time - start_time)
+            return cached_data
+
+    # Query database
+    result, db_time = get_campaign_performance_from_db(campaign_id)
+
+    if result is None:
+        return {"error": "Data not found"}
+
+    # Store in cache
+    if not no_cache:
+        set_in_cache(cache_key, result, TTL_CAMPAIGN_PERFORMANCE)
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    if no_cache:
+        performance_stats['without_cache'].append(total_time)
+    else:
+        performance_stats['with_cache'].append(total_time)
+
+    return result
+
+
+@app.get("/advertiser/{advertiser_id}/spending")
+def get_advertisers_spend(advertiser_id: int,
+                          no_cache: Annotated[bool, Query(description="Skip cache for performance testing")] = False):
+    cache_key = f"advertiser_spending:{advertiser_id}"
+    start_time = time.time()
+
+    if not no_cache:
+        cached_data = get_from_cache(cache_key)
+        if cached_data:
+            end_time = time.time()
+            performance_stats['with_cache'].append(end_time - start_time)
+            return cached_data
+
+    # Query database
+    result, db_time = get_advertisers_spend_from_db(advertiser_id)
+
+    if result is None:
+        return {"error": "Data not found"}
+
+    # Store in cache
+    if not no_cache:
+        set_in_cache(cache_key, result, TTL_ADVERTISER_SPENDING)
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    if no_cache:
+        performance_stats['without_cache'].append(total_time)
+    else:
+        performance_stats['with_cache'].append(total_time)
+
+    return result
+
+
+@app.get("/user/{user_id}/engagements")
+def get_user_engagements(user_id: int,
+                         no_cache: Annotated[bool, Query(description="Skip cache for performance testing")] = False):
+    cache_key = f"user_engagements:{user_id}"
+    start_time = time.time()
+
+    if not no_cache:
+        cached_data = get_from_cache(cache_key)
+        if cached_data:
+            end_time = time.time()
+            performance_stats['with_cache'].append(end_time - start_time)
+            return cached_data
+
+    # Query database
+    result, db_time = get_user_engagements_from_db(user_id)
+
+    if not result:
+        return {"error": "Data not found"}
+
+    # Store in cache
+    if not no_cache:
+        set_in_cache(cache_key, result, TTL_USER_ENGAGEMENTS)
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    if no_cache:
+        performance_stats['without_cache'].append(total_time)
+    else:
+        performance_stats['with_cache'].append(total_time)
+
+    return result
 
 
 if __name__ == "__main__":
