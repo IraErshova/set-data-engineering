@@ -136,4 +136,28 @@ Run this script to run queries to answer key business questions:
 python py_scripts/cassandra/performance_report.py
 ```
 
+# Homework 5
 
+## 1. To run API and Redis in the container:
+
+```bash
+docker-compose up -d
+```
+
+What this file does:
+* Starts a MySQL, MongoDB, Cassandra and Redis containers.
+* Run API on http://0.0.0.0:8000/
+
+## 2. API app with endpoints
+
+I've added `app/main.py` file with all necessary code for API. It works with
+MySQL DB and Redis cache
+
+
+## 3. Python script to test API and get performance statistic
+
+Run this script to test API and get performance statistic:
+
+```bash
+python py_scripts/api/test_api.py
+```

@@ -3,7 +3,7 @@ import os
 import time
 import redis
 from typing import Annotated
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from mysql.connector import pooling
 
 # TTL settings in seconds
@@ -62,6 +62,9 @@ def set_in_cache(key: str, data, ttl: int):
     except Exception as e:
         print(f"Cache write error: {e}")
         return False
+
+def calculate_avg(times_list):
+    return sum(times_list) / len(times_list) if times_list else 0
 
 def measure_time(func):
     # Decorator to measure execution time
@@ -207,6 +210,7 @@ def get_campaign_performance(campaign_id: int, no_cache: Annotated[
 
     if no_cache:
         performance_stats['without_cache'].append(total_time)
+        print(performance_stats['without_cache'])
     else:
         performance_stats['with_cache'].append(total_time)
 
@@ -241,6 +245,7 @@ def get_advertisers_spend(advertiser_id: int,
 
     if no_cache:
         performance_stats['without_cache'].append(total_time)
+        print(performance_stats['without_cache'])
     else:
         performance_stats['with_cache'].append(total_time)
 
@@ -275,11 +280,72 @@ def get_user_engagements(user_id: int,
 
     if no_cache:
         performance_stats['without_cache'].append(total_time)
+        print(performance_stats['without_cache'])
     else:
         performance_stats['with_cache'].append(total_time)
 
     return result
 
+
+@app.get("/performance/stats")
+async def get_performance_stats():
+    total_requests = len(performance_stats['with_cache']) + len(performance_stats['without_cache'])
+    cache_hits = len(performance_stats['with_cache'])
+
+    return {
+        "total_requests": total_requests,
+        "cache_hits": cache_hits,
+        "avg_response_time_with_cache": calculate_avg(performance_stats['with_cache']),
+        "avg_response_time_without_cache": calculate_avg(performance_stats['without_cache']),
+        "performance_improvement": (
+                calculate_avg(performance_stats['without_cache']) - calculate_avg(performance_stats['with_cache'])
+        ) if performance_stats['with_cache'] and performance_stats['without_cache'] else 0
+    }
+
+
+@app.get("/performance/comparison")
+async def get_performance_comparison():
+    with_cache_avg = calculate_avg(performance_stats['with_cache'])
+    without_cache_avg = calculate_avg(performance_stats['without_cache'])
+
+    total_requests = len(performance_stats['with_cache']) + len(performance_stats['without_cache'])
+    cache_hits = len(performance_stats['with_cache'])
+
+    return {
+        "comparison_table": {
+            "metric": ["Average Response Time", "Cache Hit Ratio", "Performance Improvement"],
+            "with_redis_cache": [
+                f"{with_cache_avg:.4f}s",
+                f"{(cache_hits / total_requests * 100):.1f}%" if total_requests > 0 else "0%",
+                f"{((without_cache_avg - with_cache_avg) / without_cache_avg * 100):.1f}%" if without_cache_avg > 0 else "N/A"
+            ],
+            "without_redis_cache": [
+                f"{without_cache_avg:.4f}s",
+                "0%",
+                "0%"
+            ]
+        },
+        "raw_data": {
+            "with_cache_times": performance_stats['with_cache'],
+            "without_cache_times": performance_stats['without_cache']
+        }
+    }
+
+
+@app.get("/performance/reset")
+async def reset_performance_stats():
+    performance_stats['with_cache'].clear()
+    performance_stats['without_cache'].clear()
+    return {"message": "success"}
+
+
+@app.get("/cache/clear")
+async def clear_cache():
+    try:
+        await redis_client.flushdb()
+        return {"message": "Cache cleared successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clear cache: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
